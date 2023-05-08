@@ -145,8 +145,7 @@ function createSceneGraph(gl, resources) {
 }
 
 function initRenderToTexture() {
-  var depthTextureExt = gl.getExtension("WEBGL_depth_texture");
-  if(!depthTextureExt) { alert('No depth texture support!!!'); return; }
+
 
   //generate color texture (required mainly for debugging and to avoid bugs in some WebGL platforms)
   renderTargetFramebuffer = gl.createFramebuffer();
@@ -164,11 +163,11 @@ function initRenderToTexture() {
   //create depth texture
   renderTargetDepthTexture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, renderTargetDepthTexture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, framebufferWidth, framebufferHeight, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, framebufferWidth, framebufferHeight, 0, gl.DEPTH_COMPONENT, gl.FLOAT, null);
 
   //bind textures to framebuffer
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTargetColorTexture, 0);
@@ -237,7 +236,9 @@ class ShadowSGNode extends SGNode {
 
     //TASK 2.1: compute eye-to-light matrix by multiplying this.lightViewProjectionMatrix and context.invViewMatrix
     //Hint: Look at the computation of lightViewProjectionMatrix to see how to multiply two matrices and for the correct order of the matrices!
-    var eyeToLightMatrix = mat4.create();
+    var eyeToLightMatrix = mat4.multiply(mat4.create(), 
+    this.lightViewProjectionMatrix, context.invViewMatrix);
+
     gl.uniformMatrix4fv(gl.getUniformLocation(context.shader, 'u_eyeToLightMatrix'), false, eyeToLightMatrix);
 
     //activate and bind texture
@@ -275,7 +276,7 @@ function renderToTexture(timeInMilliseconds)
   let worldLightLookAtPos = [0,0,0];
   let upVector = [0,1,0];
   //TASK 1.1: setup camera to look at the scene from the light's perspective
-  let lookAtMatrix = mat4.lookAt(mat4.create(), [0,1,-10], [0,0,0], [0,1,0]); //replace me for TASK 1.1
+  let lookAtMatrix = mat4.lookAt(mat4.create(), worldLightPos, worldLightLookAtPos, upVector); //replace me for TASK 1.1
   context.viewMatrix = lookAtMatrix;
 
   //multiply and save light projection and view matrix for later use in shadow mapping shader!
