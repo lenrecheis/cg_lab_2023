@@ -145,7 +145,12 @@ function createSceneGraph(gl, resources) {
 }
 
 function initRenderToTexture() {
+<<<<<<< HEAD
 
+=======
+  //var depthTextureExt = gl.getExtension("WEBGL_depth_texture");
+  //if(!depthTextureExt) { alert('No depth texture support!!!'); return; }
+>>>>>>> 6519a4c80232da0f943f3a32c32689b3e300fc77
 
   //generate color texture (required mainly for debugging and to avoid bugs in some WebGL platforms)
   renderTargetFramebuffer = gl.createFramebuffer();
